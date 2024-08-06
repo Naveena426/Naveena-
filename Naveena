@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SIZE 4
+#define FILENAME "stack_state.txt"
+
+int top = -1, inp_array[SIZE];
+void push(int x);  // Function to push an element onto the stack
+void pop();        // Function to pop an element from the stack
+void show();       // Function to display the elements in the stack
+void save_state(); // Function to save the stack state to a file
+void load_state(); // Function to load the stack state from a file
+
+int main(int argc, char *argv[])
+{
+    load_state();
+
+    if (argc < 2) {
+        // Print usage information if no arguments are provided
+        printf("Usage: %s <command> [<value>]...\n", argv[0]);
+        printf("Commands:\n");
+        printf("  push <value>  - Push value onto the stack\n");
+        printf("  pop           - Pop value from the stack\n");
+        printf("  show          - Show elements in the stack\n");
+        return 1;
+    }
+
+    // Iterate over the command line arguments
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "push") == 0) {
+            // Handle the push command
+            if (i + 1 < argc) {
+                int value = atoi(argv[++i]);
+                push(value);
+            } else {
+                printf("Usage: %s push <value>\n", argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "pop") == 0) {
+            // Handle the pop command
+            pop();
+        } else if (strcmp(argv[i], "show") == 0) {
+            // Handle the show command
+            show();
+        } else {
+            printf("Invalid command: %s. Use 'push', 'pop', or 'show'.\n", argv[i]);
+            return 1;
+        }
+    }
+
+    save_state();
+    return 0;
+}
+
+void push(int x)
+{
+    if (top == SIZE - 1) {
+        // Check for stack overflow
+        printf("\nOverflow!!\n");
+    } else {
+        // Push the element onto the stack
+        top = top + 1;
+        inp_array[top] = x;
+        printf("Pushed %d onto the stack\n", x);
+    }
+}
+
+void pop()
+{
+    if (top == -1) {
+        // Check for stack underflow
+        printf("\nUnderflow!!\n");
+    } else {
+        // Pop the element from the stack
+        printf("Popped element: %d\n", inp_array[top]);
+        top = top - 1;
+    }
+}
+
+void show()
+{
+    if (top == -1) {
+        // Check if the stack is empty
+        printf("The stack is empty\n");
+    } else {
+        // Print the elements of the stack
+        printf("Elements present in the stack: \n");
+        for (int i = top; i >= 0; --i)
+            printf("%d\n", inp_array[i]);
+    }
+}
+
+void save_state()
+{
+    FILE *file = fopen(FILENAME, "w");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    fprintf(file, "%d\n", top);
+    for (int i = 0; i <= top; i++) {
+        fprintf(file, "%d\n", inp_array[i]);
+    }
+
+    fclose(file);
+}
+
+void load_state()
+{
+    FILE *file = fopen(FILENAME, "r");
+    if (file == NULL) {
+        // If the file does not exist, assume an empty stack
+        return;
+    }
+
+    fscanf(file, "%d\n", &top);
+    for (int i = 0; i <= top; i++) {
+        fscanf(file, "%d\n", &inp_array[i]);
+    }
+
+    fclose(file);
+}
